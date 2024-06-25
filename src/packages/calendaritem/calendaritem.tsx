@@ -188,11 +188,27 @@ export const CalendarItem = React.forwardRef<
   const classPrefix = 'nut-calendar'
   const dayPrefix = 'nut-calendar-day'
 
+  const getDayRealHeight = () => {
+    const element = document.createElement('div')
+    element.className = `${classPrefix}-day`
+    element.textContent = ' '
+
+    if (!monthsRef.current) {
+      return 60
+    }
+
+    monthsRef.current.appendChild(element)
+    const height = element.offsetHeight
+    monthsRef.current.removeChild(element)
+    return height
+  }
+
   // 获取月数据
   const getMonthData = (curData: string[], monthNum: number, type: string) => {
     let i = 0
     let date = curData
     const monthData = monthsData
+    let dayHeight = 0
     do {
       const y = parseInt(date[0], 10)
       const m = parseInt(date[1], 10)
@@ -200,7 +216,13 @@ export const CalendarItem = React.forwardRef<
         ...(getPreMonthDates('prev', y, m, firstDayOfWeek) as CalendarDay[]),
         ...(getDaysStatus('active', y, m) as CalendarDay[]),
       ]
-      const cssHeight = 39 + (days.length > 35 ? 384 : 320)
+
+      if (dayHeight === 0) {
+        dayHeight = getDayRealHeight()
+      }
+      // const cssHeight = 39 + (days.length > 35 ? 384 : 320)
+      const cssHeight =
+        39 + (days.length > 35 ? dayHeight * 6 + 24 : dayHeight * 5 + 20)
 
       let scrollTop = 0
       if (monthData.length > 0) {
